@@ -7,12 +7,19 @@ const morgan = require('morgan')
 const passport = require('./passport_config').passport
 const path = require('path')
 const flash = require('connect-flash')
-
+const fs = require('fs')
+const util = require('util')
 const MySQLStore = require('express-mysql-session')(session) // MySql para manejar los datos de sesion.
 const dbOptions = require('./database_config').options
+const config = require('config')
 
 const apiRouter = require('../controller/api/index_controller').router
 const webRouter = require('../controller/web/index_controller').router
+const datenow = new Date()
+let isoDate = datenow.toISOString().replaceAll(':', '').replaceAll('.', '').replaceAll('-', '')
+isoDate = 'Log'.concat(isoDate) + '.log'
+const accessLogStream = fs.createWriteStream(path.join(__dirname, isoDate), { flags: 'w' })
+const logStdout = process.stdout
 
 // const passportVerification = require('./passport_config').isLoggedIn
 // const cors = require('cors')
@@ -20,7 +27,7 @@ const webRouter = require('../controller/web/index_controller').router
 const mySqlSessionStore = new MySQLStore(dbOptions)
 
 const sessionMiddleware = session({
-  secret: 'kjasgdhkjshadgjhasdgcatdfgasdg',
+  secret: config.get('secret'),
   cookie: {
     httpOnly: false,
     secure: false,
@@ -44,6 +51,12 @@ const userNameMiddleware = (req, res, next) => {
 }
 
 const app = express()
+const PORT = process.env.port || 3000
+const ENV = process.env.NODE_ENV || 'development'
+console.log = function (d) { //
+  accessLogStream.write(util.format(d) + '\n')
+  logStdout.write(util.format(d) + '\n')
+}
 
 app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ extended: true }))
@@ -72,16 +85,28 @@ app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Headers', 'Authorization')
   next()
 })
+app.use(function (err, req, res, next) {
+  console.log(err)
+  res.status(500).send('Algo salio mal!')
+})
 
-const PORT = process.env.port || 3000
-const ENV = process.env.NODE_ENV || 'development'
 // app.enable('view cache');
 
 app.use('/api', apiRouter)
 app.use('/web', webRouter)
-app.get('/', (req, res) => res.redirect('/web/home/inicio'))
+app.get('/', (req, res) => {
+  try {
+    res.redirect('/web/home/inicio')
+  } catch (e) {
+    console.log(e)
+    throw e
+  }
+})
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, (err) => {
+  if (err) {
+    console.log(util.format(err) + '\n')
+  }
   console.log(`Running in ${ENV} on port ${PORT}.`)
 })
 
@@ -102,10 +127,15 @@ app.post('/', passport.authenticate('local-login', {
 }), function (req, res) {
   // If this function gets called, authentication was successful.
   // `req.user` contains the authenticated user.
-  if (req.body.remember) {
-    req.session.cookie.maxAge = 1000 * 60 * 3
-  } else {
-    req.session.cookie.expires = false
+  try {
+    if (req.body.remember) {
+      req.session.cookie.maxAge = 1000 * 60 * 3
+    } else {
+      req.session.cookie.expires = false
+    }
+    res.redirect('/')
+  } catch (error) {
+    console.log(error)
+    throw error
   }
-  res.redirect('/')
 })

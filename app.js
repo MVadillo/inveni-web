@@ -16,9 +16,6 @@ const flash = require('connect-flash')
 const path = require('path')
 const favicon = require('serve-favicon')
 
-// Sirve para loguear la salida a otro lado que no sea la consola
-const fs = require('fs')
-
 // pass passport for configuration
 require('./config/passport')(passport)
 
