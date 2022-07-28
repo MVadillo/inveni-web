@@ -1,9 +1,9 @@
 {
     "server": {
       "host": "localhost",
-      "user": "avalex_avalex",
-      "Password": "Sb^VzQbLabCi",
-      "Database":"inveni"
+      "user": "invenimx_root",
+      "Password": "FundableD0ubles",
+      "Database":"invenimx_web"
     },
     "secret":"kjasgdhkjshadgjhasdgcatdfgasdg"
   }
