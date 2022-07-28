@@ -2,7 +2,7 @@
 
 <html lang="en">
 <head>
-   <%include ../partials/head %>
+   <%- include('../partials/head') %>
    <title>Perfil</title>
 </head>
 
@@ -16,8 +16,9 @@
     </div>
 
 
-        <%include ../partials/navbar %>
-        <%include ../partials/sidebar %>
+    <%- include('../partials/navbar') %>
+
+    <%- include('../partials/sidebar') %>
 
         <div class="content-wrapper">
 
@@ -75,9 +76,9 @@
             </div>
         </div>
     </div>
-    <%include ../partials/footer %>
+    <%- include('../partials/footer') %>
 
-<%include ../partials/js %>
+    <%- include('../partials/js') %>
 <script>
     $( document ).ready(function() {
         $("#li_usuario").addClass("active");

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <%include ../partials/head %>
+   <%- include('../partials/head') %>
    <title>WebApp Name | Inicio</title>
 </head>
 
@@ -14,9 +14,9 @@
         <img class="animation__shake" src="./dist/img/logo-grande.png" alt="WebApp Name Logo" height="120" width="auto">
     </div>
 
-    <%include ../partials/navbar %>
+    <%- include('../partials/navbar') %>
 
-    <%include ../partials/sidebar %>
+    <%- include('../partials/sidebar') %>
 
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
@@ -91,7 +91,7 @@
     </div>
     <!-- /.content-wrapper -->
 
-    <%include ../partials/footer %>
+    <%- include('../partials/footer') %>
 
     <!-- Control Sidebar -->
     <aside class="control-sidebar control-sidebar-dark">
@@ -196,7 +196,7 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
-    <%include ../partials/js %>
+<%- include('../partials/js') %>
     <script type="text/javascript">
         (function(APP){
 
