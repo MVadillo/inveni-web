@@ -20,10 +20,12 @@ router.post('/', passport.loginAuthenticator, (req, res) => {
 
 // Redirecciona al usuario a la página de login y cierra su sesion
 router.get('/logout', (req, res, next) => {
-  req.logout()
-  req.session.save((err) => {
-    if (err) return next(err)
-    res.redirect('/web/login')
+  req.logout(function (errr) {
+    if (errr) return next(errr)
+    req.session.save((err) => {
+      if (err) return next(err)
+      res.redirect('/web/login')
+    })
   })
 })
 
