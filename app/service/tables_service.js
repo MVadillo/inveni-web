@@ -1,7 +1,6 @@
 const tablesModel = require('../model/tables_model')
 const clientsModel = require('../model/clients_model')
 const dateHelpers = require('../helpers/date')
-const fs = require('fs')
 
 // Tablas omitidas por el usuario.
 const omittedTables = ['clientes', 'sessions', 'usuarios']
@@ -468,14 +467,6 @@ exports.UploadCsvDataToMySQL = async (filePath, databaseName) => {
   console.log(filePath, databaseName)
   const result = await tablesModel.UploadCsvDataToMySQL(filePath, databaseName).catch((err) => { return err })
 
-  fs.unlink(filePath, (err) => {
-    if (err) {
-      console.error(err)
-      return err
-    } else {
-      console.log('file deleted')
-    }
-  })
   return result
 }
 

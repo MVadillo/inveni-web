@@ -575,15 +575,48 @@ exports.serverSideGeneral = async (json, tableNameAndType) => {
   return connectionPool.query(statement)
 }
 
-exports.UploadCsvDataToMySQL = async (filePath, databaseName) => {
+exports.UploadCsvDataToMySQL2 = async (filePath, databaseName) => {
   // C:\Users\52614\Documents\GitHub\web-inveni\app\controller\api\app\assets\csv\uploadfile-1649988650945.csv
-  const statement = `LOAD DATA LOCAL INFILE '${filePath.replace(/\\/g, "/")}' IGNORE INTO TABLE ${databaseName}
+  const statement = `LOAD DATA LOCAL INFILE '${filePath.replace(/\\/g, '/')}' IGNORE INTO TABLE ${databaseName}
   FIELDS terminated by ','
   ENCLOSED BY '"'
   LINES TERMINATED by'\r\n'
   IGNORE 1 ROWS;`
 
   return connectionPool.query(statement)
+}
+
+exports.UploadCsvDataToMySQL = async (filePath, databaseName) => {
+  const fs = require('fs')
+  const csv = require('fast-csv')
+  const stream = fs.createReadStream(filePath)
+  let result
+  const csvData = []
+  const csvStream = csv.parse().on('data', function (data) {
+    csvData.push(data)
+  }).on('end', function () {
+  // Remove Header ROW
+    const headers = csvData[0]
+    let rows = ''
+    // eslint-disable-next-line no-unused-vars
+    for (let count = 0; count < headers.length; count++) {
+      rows = rows + headers[count] + ','
+      count++
+    }
+    rows = rows.slice(0, -1)
+
+    csvData.shift()
+    // Open the MySQL connection
+    const query = `INSERT INTO ${databaseName} (${rows}) VALUES ?`
+    result = connectionPool.query(query, [csvData])
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.error(err)
+      }
+    })
+  })
+  stream.pipe(csvStream)
+  return result
 }
 
 exports.getImprimir = async (table, id) => {
