@@ -601,14 +601,26 @@ exports.UploadCsvDataToMySQL = async (filePath, databaseName) => {
     // eslint-disable-next-line no-unused-vars
     for (let count = 0; count < headers.length; count++) {
       rows = rows + headers[count] + ','
-      count++
     }
     rows = rows.slice(0, -1)
 
     csvData.shift()
+    let valuesRows = ''
+    for (let count = 0; count < csvData.length; count++) {
+      let valuesRow = '('
+      const row = csvData[count]
+      for (let i = 0; i < row.length; count++) {
+        valuesRow = valuesRow + row[count] + ','
+      }
+      valuesRow = valuesRow.slice(0, -1)
+      valuesRow = valuesRow + '),'
+      valuesRows = valuesRows + valuesRow
+    }
+    valuesRows = valuesRows.slice(0, -1)
+    valuesRows = valuesRows + ';'
     // Open the MySQL connection
-    const query = `INSERT INTO ${databaseName} (${rows}) VALUES ?`
-    result = connectionPool.query(query, [csvData])
+    const query = `INSERT INTO ${databaseName} (${rows}) VALUES ${valuesRows}`
+    result = connectionPool.query(query)
     fs.unlink(filePath, (err) => {
       if (err) {
         console.error(err)
