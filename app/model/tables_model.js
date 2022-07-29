@@ -605,22 +605,28 @@ exports.UploadCsvDataToMySQL = async (filePath, databaseName) => {
     rows = rows.slice(0, -1)
 
     csvData.shift()
-    let valuesRows = ''
-    for (let count = 0; count < csvData.length; count++) {
-      let valuesRow = '('
-      const row = csvData[count]
-      for (let i = 0; i < row.length; count++) {
-        valuesRow = valuesRow + '"' + row[count] + '"' + ','
+
+    for (let x = 0; x < csvData.length; x++) {
+      const finalIteration = csvData.length > 2048 ? 2048 : csvData.length
+      let valuesRows = ''
+      for (let count = 0; count < finalIteration; count++) {
+        let valuesRow = '('
+        const row = csvData[0]
+        for (let i = 0; i < row.length; count++) {
+          valuesRow = valuesRow + '"' + row[i] + '"' + ','
+        }
+        valuesRow = valuesRow.slice(0, -1)
+        valuesRow = valuesRow + '),'
+        valuesRows = valuesRows + valuesRow
+        csvData.shift()
       }
-      valuesRow = valuesRow.slice(0, -1)
-      valuesRow = valuesRow + '),'
-      valuesRows = valuesRows + valuesRow
+      valuesRows = valuesRows.slice(0, -1)
+      valuesRows = valuesRows + ';'
+      // Open the MySQL connection
+      const query = `INSERT INTO ${databaseName} (${rows}) VALUES ${valuesRows}`
+      result = connectionPool.query(query)
     }
-    valuesRows = valuesRows.slice(0, -1)
-    valuesRows = valuesRows + ';'
-    // Open the MySQL connection
-    const query = `INSERT INTO ${databaseName} (${rows}) VALUES ${valuesRows}`
-    result = connectionPool.query(query)
+
     fs.unlink(filePath, (err) => {
       if (err) {
         console.error(err)
