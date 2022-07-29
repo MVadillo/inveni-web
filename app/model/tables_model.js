@@ -610,7 +610,7 @@ exports.UploadCsvDataToMySQL = async (filePath, databaseName) => {
       let valuesRow = '('
       const row = csvData[count]
       for (let i = 0; i < row.length; count++) {
-        valuesRow = valuesRow + row[count] + ','
+        valuesRow = valuesRow + '"' + row[count] + '"' + ','
       }
       valuesRow = valuesRow.slice(0, -1)
       valuesRow = valuesRow + '),'
