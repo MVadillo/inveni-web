@@ -483,9 +483,9 @@ exports.UploadCsvDataToMySQL = async (filePath, databaseName) => {
     rows = rows.slice(0, -1)
 
     csvData.shift()
-
+    
     for (let x = 0; x < csvData.length; x++) {
-      const finalIteration = csvData.length > 2048 ? 2048 : csvData.length
+      const finalIteration = csvData.length > 8192 ? 8192 : csvData.length
       let valuesRows = ''
       for (let count = 0; count < finalIteration; count++) {
         let valuesRow = '('
@@ -504,7 +504,6 @@ exports.UploadCsvDataToMySQL = async (filePath, databaseName) => {
       const query = `INSERT INTO ${databaseName} (${rows}) VALUES ${valuesRows}`
       result = await tablesModel.UploadCsvDataToMySQL(query).catch((err) => { return err })
     }
-
     fs.unlink(filePath, (err) => {
       if (err) {
         console.error(err)
