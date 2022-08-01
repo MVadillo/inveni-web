@@ -586,55 +586,8 @@ exports.UploadCsvDataToMySQL2 = async (filePath, databaseName) => {
   return connectionPool.query(statement)
 }
 
-exports.UploadCsvDataToMySQL = async (filePath, databaseName) => {
-  const fs = require('fs')
-  const csv = require('fast-csv')
-  const stream = fs.createReadStream(filePath)
-  let result
-  const csvData = []
-  const csvStream = csv.parse().on('data', function (data) {
-    csvData.push(data)
-  }).on('end', function () {
-  // Remove Header ROW
-    const headers = csvData[0]
-    let rows = ''
-    // eslint-disable-next-line no-unused-vars
-    for (let count = 0; count < headers.length; count++) {
-      rows = rows + headers[count] + ','
-    }
-    rows = rows.slice(0, -1)
-
-    csvData.shift()
-
-    for (let x = 0; x < csvData.length; x++) {
-      const finalIteration = csvData.length > 2048 ? 2048 : csvData.length
-      let valuesRows = ''
-      for (let count = 0; count < finalIteration; count++) {
-        let valuesRow = '('
-        const row = csvData[0]
-        for (let i = 0; i < row.length; count++) {
-          valuesRow = valuesRow + '"' + row[i] + '"' + ','
-        }
-        valuesRow = valuesRow.slice(0, -1)
-        valuesRow = valuesRow + '),'
-        valuesRows = valuesRows + valuesRow
-        csvData.shift()
-      }
-      valuesRows = valuesRows.slice(0, -1)
-      valuesRows = valuesRows + ';'
-      // Open the MySQL connection
-      const query = `INSERT INTO ${databaseName} (${rows}) VALUES ${valuesRows}`
-      result = connectionPool.query(query)
-    }
-
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        console.error(err)
-      }
-    })
-  })
-  stream.pipe(csvStream)
-  return result
+exports.UploadCsvDataToMySQL = async (query) => {
+  return connectionPool.query(query)
 }
 
 exports.getImprimir = async (table, id) => {
