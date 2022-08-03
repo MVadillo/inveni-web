@@ -464,6 +464,17 @@ exports.createTablaCombinada = async (nombre, tablas, columnas, municipios, esta
 }
 
 exports.UploadCsvDataToMySQL = async (filePath, databaseName) => {
+  const fs = require('fs')
+  const result = await tablesModel.UploadCsvDataToMySQL2(filePath, databaseName).catch((err) => { return err })
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      console.error(err)
+    }
+  })
+  return result
+}
+
+exports.UploadCsvDataToMySQLByApp = async (filePath, databaseName) => {
   console.log(filePath, databaseName)
   const fs = require('fs')
   const csv = require('fast-csv')
