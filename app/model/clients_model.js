@@ -43,6 +43,6 @@ exports.updateDetalles = async (id, direccion, telefono, email, fechaLimite, not
 }
 
 exports.isClientStillAllowed = (usuario, fechaActual) => {
-  const statement = 'select * from `inveni`.`clientes` where `usuario` = ? AND fecha_limite >= ?'
+  const statement = 'select * from `clientes` where `usuario` = ? AND fecha_limite >= ?'
   return connectionPool.query(statement, [usuario, fechaActual])
 }
