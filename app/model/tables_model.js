@@ -59,7 +59,7 @@ exports.create = (tableName, nombreColumnas) => {
 exports.createControlTable = (tableName) => {
   let statement = 'create table if not exists `' + tableName + '_control` ( id INT AUTO_INCREMENT PRIMARY KEY, '
   statement += 'user_id int, allowed tinyint, access_limit int, access_count int, columnas varchar(200) DEFAULT "NOMBRE,DOMICILIO,COLONIA,CP,TELEFONO,COMPANIA,RFC,CURP,FECHA_NACIMIENTO,PLACA,NUM_SERIE,MODELO,MARCA,LINEA,SALARIO,EMPRESA,ANO,GIRO,NUM_PATRON,NUM_AFILIACION,CONYUGUE,ESTADO,MUNICIPIO", '
-  statement += 'no_consultas int DEFAULT 0, limite_consultas int DEFAULT 20 )'
+  statement += 'no_consultas int DEFAULT 0, limite_consultas int DEFAULT 20, rango varchar(45) DEFAULT "5,10,20" )'
   statement += ' ENGINE=INNODB COLLATE=utf8_general_ci CHARSET=utf8'
 
   return connectionPool.query(statement)
@@ -148,6 +148,12 @@ exports.limite = (table, valor, id) => {
 
 exports.accesos = (table, valor, id) => {
   const statement = 'update `' + table + '_control` set access_count = ' + valor + ' where id = ' + id
+
+  return connectionPool.query(statement)
+}
+
+exports.rango = (table, valor, id) => {
+  const statement = 'update `' + table + '_control` set rango = "' + valor + '" where id = ' + id
 
   return connectionPool.query(statement)
 }
@@ -606,4 +612,10 @@ exports.increasePrintingCounter = (tabla, id) => {
   const statement = 'update `' + tabla + '_control` set no_consultas = no_consultas + 1 where user_id = ?'
 
   return connectionPool.query(statement, [id])
+}
+
+exports.getUserRange = async (table, id) => {
+  const statement = 'select rango from `' + table + '_control` where user_id = ' + id
+
+  return connectionPool.query(statement)
 }

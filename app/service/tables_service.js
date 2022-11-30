@@ -116,6 +116,10 @@ exports.accesos = async (table, valor, id) => {
   return await tablesModel.accesos(table, valor, id)
 }
 
+exports.rango = async (table, valor, id) => {
+  return await tablesModel.rango(table, valor, id)
+}
+
 exports.serverSide = async (json) => {
   const returnData = {}
   // const conteo = await tablesModel.getTablesCount(json.table)
@@ -547,4 +551,15 @@ exports.persmisosDeImpresion = async (usuario, tabla) => {
   await tablesModel.increasePrintingCounter(tabla, client[0].id)
 
   return await tablesModel.isUserAllowedOnTable(tabla, client[0].id)
+}
+
+exports.getUserRange = async (table, usuario) => {
+  const client = await clientsModel.getClientesByUsername(usuario)
+  if (client.length <= 0 || client[0].activo === 0) {
+    return {
+      message: 'Cliente no permitido.',
+      rows: []
+    }
+  }
+  return await tablesModel.getUserRange(table, client[0].id)
 }

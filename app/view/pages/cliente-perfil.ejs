@@ -129,6 +129,7 @@
                                 <th>Permitido</th>
                                 <th># Consultas</th>
                                 <th>Límite consultas</th>
+                                <th>Rangos</th>
                                 <th>Opciones</th>
                               </tr>
                             </thead>
@@ -258,6 +259,41 @@
     </div><!-- /.modal-dialog -->
   </div><!-- /.modal -->
 
+  <!-- Edit Usuarios Modal -->
+  <div class="modal fade" id="edit_rangos_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="edit_title_rango"></h4>
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i
+              class="fas fa-window-close"></i></button>
+        </div>
+        <form role="form" id="edit_rangos_form">
+          <div class="modal-body">
+            <div class="form-group">
+              <input type="hidden" id="edit_id_rango" class="form-control"></input>
+              <input type="hidden" id="edit_table_rango" class="form-control"></input>
+              <input type="hidden" id="edit_tipo_rango" class="form-control"></input>
+              <div class="form-group row">
+                <label for="edit_valor_rango" class="col-sm-6 col-form-label">Valor:</label>
+                <div class="col-sm-6">
+                  <input id="edit_valor_rango" type="text" class="form-control"
+                    onkeypress="return event.charCode >= 32 && event.charCode <= 57" required>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cerrar</button>
+            <button type="submit" id="edit_guardar_cambios_rango" class="btn btn-sm btn-outline-success">Guardar
+              cambios</button>
+          </div>
+        </form>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
   <!-- Edit Detalles Modal -->
   <div class="modal fade" id="edit_detalles_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
     aria-hidden="true">
@@ -363,7 +399,7 @@
               } else {
                 var tablas = data.payload.tablesDetail;
                 $('#permisos_table_data').html('');
-                var columnNames = ["id", "name", "allowed", "access_count", "access_limit", "opciones"];
+                var columnNames = ["id", "name", "allowed", "access_count", "access_limit", "rango", "opciones"];
                 for (var i = 0; i < tablas.length; i++) {
                   var trElement = $('<tr></tr>');
                   for (var j = 0; j < columnNames.length; j++) {
@@ -391,6 +427,7 @@
                     },
                     { data: 'access_count' },
                     { data: 'access_limit' },
+                    { data: 'rango' },
                     {
                       data: null,
                       render: function (data, type, row, meta) {
@@ -400,6 +437,7 @@
                           <button type="button" class="btn btn-outline-dark btn-sm" data-row-tipo="accesos" data-row-id="${row.id}" data-row-table="${row.name}" data-row-valor="${row.access_count}"># Consultas</button>
                           <button type="button" class="btn btn-outline-dark btn-sm" data-row-tipo="limite" data-row-id="${row.id}" data-row-table="${row.name}" data-row-valor="${row.access_limit}">Límite</button>
                           <button type="button" class="btn btn-outline-dark btn-sm" data-row-tipo="imprimir" data-row-id="${row.id}" data-row-table="${row.name}" >Impresiones</button>
+                          <button type="button" class="btn btn-outline-dark btn-sm" data-row-tipo="rango" data-row-id="${row.id}" data-row-table="${row.name}" data-row-valor="${row.rango}">Rangos</button>
                         `;
                       }
                     },
@@ -448,6 +486,19 @@
               APP.LOAD.LIMITE(table, valor, id);
             } else if (tipo === "accesos") {
               APP.LOAD.ACCESOS(table, valor, id);
+            } 
+          })
+
+          $("#edit_guardar_cambios_rango").on('click', function (event) {
+            event.preventDefault();
+            $("#edit_rangos_modal").modal({ show: true });
+
+            var tipo = $('#edit_tipo_rango').val();
+            var id = $('#edit_id_rango').val();
+            var table = $('#edit_table_rango').val();
+            var valor = $('#edit_valor_rango').val();
+            if  (tipo === "rango") {
+              APP.LOAD.RANGO(table, valor, id);
             }
           })
 
@@ -475,6 +526,13 @@
               $('#edit_valor').val($(this).data("row-valor"));
             } else if (tipo === "imprimir") {
               APP.LOAD.IMPRIMIR_MODAL_DATA(table, id)
+            } else if (tipo === "rango") {
+              $("#edit_rangos_modal").modal({ show: true });
+              $('#edit_title_rango').text("Editar rango de filas");
+              $('#edit_tipo_rango').val("rango");
+              $('#edit_id_rango').val($(this).data("row-id"));
+              $('#edit_table_rango').val($(this).data("row-table"));
+              $('#edit_valor_rango').val($(this).data("row-valor"));
             }
           });
 
@@ -579,6 +637,24 @@
               $('#permisos_table').dataTable().fnDestroy();
               APP.LOAD.PERMISOS_CLIENTE();
               $('#edit_limite_accesos_modal').modal('hide');
+            },
+            error: function (xhr) {
+              Toast.fire({ icon: 'warning', title: 'No se pudo guardar el cambio, intenta nuevamente' });
+            },
+          });
+        };
+
+        APP.LOAD.RANGO = APP.LOAD.RANGO || function (table, valor, id) {
+          $.ajax({
+            cache: false,
+            url: '/api/tables/rango',
+            type: 'PUT',
+            data: { table: table, valor: valor, id: id },
+            success: function (data) {
+              Toast.fire({ icon: 'success', title: data.message });
+              $('#permisos_table').dataTable().fnDestroy();
+              APP.LOAD.PERMISOS_CLIENTE();
+              $('#edit_rangos_modal').modal('hide');
             },
             error: function (xhr) {
               Toast.fire({ icon: 'warning', title: 'No se pudo guardar el cambio, intenta nuevamente' });

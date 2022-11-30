@@ -338,6 +338,33 @@ ROUTER.put('/accesos/', (req, res) => {
     })
 })
 
+ROUTER.put('/rango/', (req, res) => {
+  tablesService.rango(req.body.table, req.body.valor, req.body.id)
+    .then((result) => {
+      if (result.changedRows > 0) {
+        res.status(201)
+        res.contentType('application/json')
+        res.send(JSON.stringify({
+          message: 'Cambio guardado'
+        }))
+      } else {
+        res.status(201)
+        res.contentType('application/json')
+        res.send(JSON.stringify({
+          message: 'Sin cambios en el valor.'
+        }))
+      }
+    }).catch((err) => {
+      res.status(400)
+      console.error('[tables_controller.js][/rango/]Error al cambiar el rango de filas a mostrar: ', err)
+      res.contentType('application/json')
+      res.send(JSON.stringify({
+        message: 'No se pudo guardar el rango de filas a mostrar.',
+        err: err
+      }))
+    })
+})
+
 ROUTER.post('/getTableData/', (req, res) => {
   const json = req.body
   tablesService.serverSide(json)
@@ -453,4 +480,20 @@ ROUTER.put('/guardarImprimir/', (req, res) => {
     })
 })
 
+ROUTER.get('/getUserRangeParams/:table/:usuario', (req, res) => {
+  const table = req.params.table
+  const usuario = req.params.usuario
+  tablesService.getUserRange(table, usuario)
+    .then((result) => {
+      res.status(200)
+      res.contentType('application/json')
+      res.send(JSON.stringify(result))
+    })
+    .catch((err) => {
+      console.error('[tables_controller.js][/getUserRange/]Error when pulling server side query: ', err)
+      res.status(500)
+      res.contentType('application/json')
+      res.send(JSON.stringify({ message: 'Unable to lookup tables. Try again later, please.' }))
+    })
+})
 exports.router = ROUTER

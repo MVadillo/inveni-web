@@ -251,8 +251,9 @@
                                 render: function(data, type, row, meta) {
                                     return `
                                         <a class="btn btn-md btn-outline-success btn-sm" href="/web/home/cliente-perfil?idCliente=${row.id}">Actividad</a>
-                                        <button type="button" class="editar btn btn-md btn-outline-primary btn-sm" data-row-nombre="${row.nombre}" data-row-usuario="${row.usuario}" data-row-password="${row.password}" data-row-activo="${row.activo}" data-row-id="${row.id}">Editar</button>
-                                        <button type="button" class="eliminar btn btn-md btn-outline-danger btn-sm" data-row-nombre="${row.nombre}" data-row-id="${row.id}">Eliminar</button>
+                                        <button type="button" class="editar btn btn-md btn-outline-primary btn-sm" data-row-nombre="${row.nombre}" data-row-usuario="${row.usuario}" data-row-password="${row.password}" data-row-activo="${row.activo}" data-row-id="${row.id}" 
+                                            onclick="editMe('${row.id}','${row.nombre}','${row.usuario}','${row.password}','${row.activo}')">Editar</button>
+                                        <button type="button" class="eliminar btn btn-md btn-outline-danger btn-sm" data-row-nombre="${row.nombre}" data-row-id="${row.id}" onClick='deleteMe("${row.id}","${row.nombre}")'>Eliminar</button>
                                     `;
                                 } 
                             },
@@ -306,8 +307,8 @@
                                 }
                             };
                             
-                            $("#clientes_datatable").find(".editar").on("click", onEditShow);
-                            $("#clientes_datatable").find(".eliminar").on("click", onDeleteShow);
+                            //$("#clientes_datatable").find(".editar").on("click", onEditShow);
+                            //$("#clientes_datatable").find(".eliminar").on("click", onDeleteShow);
                         }
                     });
                 }
@@ -392,6 +393,44 @@
         APP.LOAD.EDIT_CLIENTES();
         APP.LOAD.UI();
     })(window);
+
+    function editMe(id,nombre,usuario,password,activo){
+        $("#editClientesModal").modal({show: true});
+        $('#edit_id').val(id);
+        $('#edit_nombre').val(nombre);
+        $('#edit_usuario').val(usuario);
+        $('#edit_password').val(password);
+        $('#edit_activo').prop('checked', (activo == "1"));
+    };
+
+    function deleteMe (id,nombre)
+    {
+        var id_a_eliminar = id;
+        var nombre_a_eliminar = nombre;
+        var areaId = $("#combobox_areas").val();
+
+        var result = confirm("Quieres borrar: " + nombre_a_eliminar);
+        if (result) {
+            $.ajax({
+                type: "DELETE",
+                url: `/api/clients/delete/${id_a_eliminar}`,
+                error: function (xhr, status, error) {
+                    Toast.fire({
+                        icon:'warning',
+                        title:'Error' + error
+                    });
+                },
+                success: function (text) {
+                    Toast.fire({
+                        icon:'success',
+                        title:'Se eliminó el registro'
+                    });
+                    $('#clientes_datatable').dataTable().fnDestroy();
+                    APP.LOAD.GRID_CLIENTES();
+                }
+            });
+        }
+    };
 </script>
 </body>
 </html>
